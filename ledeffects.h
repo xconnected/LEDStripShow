@@ -5,7 +5,7 @@
 #include <Arduino.h>
 #include <TCounter.h>
 #include <TTimer.h>
-#include "ledstrip.h"
+#include <TLedstrip.h>
 
 PROGMEM const byte sinT[]  = { 0, 20, 40, 60, 79, 98, 116, 133, 150, 166, 180, 194, 206, 217, 227, 236, 243, 248, 252, 254, 255 };
 

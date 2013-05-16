@@ -32,7 +32,7 @@ struct Effect_t {
 };
 
 // ---------------------------------------------------------------------------
-class TLEDStripShow {
+class TLedStripShow {
 
   private:
     byte   _mode;
@@ -42,7 +42,7 @@ class TLEDStripShow {
     TTimer TimerSaving;
     
   public:
-    TLEDStripShow() {};
+    TLedStripShow() {};
     void run();
     void flash();
     

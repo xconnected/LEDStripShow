@@ -7,7 +7,7 @@
 #include <TTimer.h>
 #include <TCounter.h>
 #include <TSwitch.h>
-#include "ledstrip.h"
+#include <TLedStrip.h>
 #include "ledeffects.h"
 #include "LEDStripShow.h"
 
@@ -44,7 +44,7 @@ TSwitch          UISwitch = TSwitch(5);
 TLedStrip        LedStrip(_LED_COUNT_);
 
 // Controller Object
-TLEDStripShow  LightStripShow;
+TLedStripShow  LightStripShow;
 
 // ---------------------------------------------------------------------------
 // Effect Objects
@@ -94,38 +94,38 @@ void TimerAdapterSaving() {
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
 
-void TLEDStripShow::delayedSaving() {
+void TLedStripShow::delayedSaving() {
   TimerSaving.init(_WAIT_SAVE_, &TimerAdapterSaving);  
 };
 // ---------------------------------------------------------------------------
-void TLEDStripShow::savingDone() {
+void TLedStripShow::savingDone() {
   TimerSaving.disable();  
 };
 // ---------------------------------------------------------------------------
-void TLEDStripShow::enableCycling() {
+void TLedStripShow::enableCycling() {
   flash();
   _mode |= _MODE_CYCLER_; 
   TimerCycler.init(_CYCLE_TIME_, &TimerAdapterCycler);
 };
 // ---------------------------------------------------------------------------
-void TLEDStripShow::disableCycling() {
+void TLedStripShow::disableCycling() {
   _mode &= (~_MODE_CYCLER_);
   TimerCycler.disable();
 };
 // ---------------------------------------------------------------------------
-byte TLEDStripShow::isCyclingEnabled() {
+byte TLedStripShow::isCyclingEnabled() {
   return _mode & _MODE_CYCLER_;
 };
 // ---------------------------------------------------------------------------
-void TLEDStripShow::setMode(byte mode) {
+void TLedStripShow::setMode(byte mode) {
   if ( mode & _MODE_CYCLER_ ) enableCycling();
 };
 // ---------------------------------------------------------------------------
-byte TLEDStripShow::getMode() { 
+byte TLedStripShow::getMode() { 
   return _mode;
 };
 // ---------------------------------------------------------------------------
-byte TLEDStripShow::setEffect(byte ix) {
+byte TLedStripShow::setEffect(byte ix) {
 
   _effectIx = ix;
 
@@ -144,15 +144,15 @@ byte TLEDStripShow::setEffect(byte ix) {
   return _effectIx;
 };
 // ---------------------------------------------------------------------------
-byte TLEDStripShow::nextEffect() {
+byte TLedStripShow::nextEffect() {
   return setEffect(_effectIx+1);
 };
 // ---------------------------------------------------------------------------
-byte TLEDStripShow::getEffect() {
+byte TLedStripShow::getEffect() {
   return _effectIx;
 };
 // ---------------------------------------------------------------------------
-void TLEDStripShow::saveSettings(byte ix) {
+void TLedStripShow::saveSettings(byte ix) {
 
 #ifdef DEBUG  
   Serial.print("save #");
@@ -186,7 +186,7 @@ void TLEDStripShow::saveSettings(byte ix) {
   
 };
 // ---------------------------------------------------------------------------
-void TLEDStripShow::loadSettings(byte ix) {
+void TLedStripShow::loadSettings(byte ix) {
 
 #ifdef DEBUG  
   Serial.print("load #");
@@ -210,7 +210,7 @@ void TLEDStripShow::loadSettings(byte ix) {
   }
 }
 // ---------------------------------------------------------------------------
-void TLEDStripShow::loadProgram() {  
+void TLedStripShow::loadProgram() {  
 
   if ( EEPROM.read(0) == _EEPROM_MARKER_ ) {
 
@@ -226,7 +226,7 @@ void TLEDStripShow::loadProgram() {
   }
 }
 // ---------------------------------------------------------------------------
-void TLEDStripShow::saveProgram() {  
+void TLedStripShow::saveProgram() {  
 
   // Write EEPROM marker if different
   if ( EEPROM.read(0) != _EEPROM_MARKER_) EEPROM.write(0, _EEPROM_MARKER_);
@@ -238,7 +238,7 @@ void TLEDStripShow::saveProgram() {
   if ( EEPROM.read(2) != getMode() )      EEPROM.write(2, getMode());
 }
 // ---------------------------------------------------------------------------
-void TLEDStripShow::flash() {
+void TLedStripShow::flash() {
 
   LedStrip.blank();
   LED.showRGB(LedStrip.get(0), LedStrip.getCount());
@@ -252,7 +252,7 @@ void TLEDStripShow::flash() {
 }  
 
 // ---------------------------------------------------------------------------
-void TLEDStripShow::run() {
+void TLedStripShow::run() {
   TimerCycler.run();
   TimerSaving.run();
 
