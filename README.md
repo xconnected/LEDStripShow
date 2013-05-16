@@ -36,19 +36,20 @@ and the two amazing useful libraries:
 Configuration
 =============
 LedStripShow.ino (look for CONFIGURATION ITEMS)
-Switch 1				- Default on PIN 4
-Rotary Encoder 			- Default on PIN 2 & 3
-Switch 2 (optional) 	- Default on PIN 5
-Ledstrip 				- WS2801  on Pin 7 & 11
+- Switch 1 (program selector) Default on PIN 4
+- Rotary Encoder Default on PIN 2 & 3
+- Switch 2 (optional/brightness) Default on PIN 5
+- Ledstrip WS2801 on Pin 7 & 11
 
 LedStripShow.h (look for CONFIGURATION ITEMS)
-Number of LEDS			_LED_COUNT_ 	25
-Number of effects		_EFFECT_COUNT_  10 (including the demo)
-Cycle Time (ms)			_CYCLE_TIME_    30000
-Wait before save (ms)	_WAIT_SAVE_     10000
+- Number of LEDS _LED_COUNT_ 	25
+- Number of effects _EFFECT_COUNT_ 10 (including the demo)
+- Cycle Time (ms) _CYCLE_TIME_ 30000
+- Wait before save (ms) _WAIT_SAVE_ 10000
 
 
 Requirements
 ============
 Sketch size: approx 12kByte
-The sketch has been tested on Arduino UNO and Arduino Mini Pro 5v/16Mhz
+
+The sketch has been successfully tested on Arduino UNO and Arduino Mini Pro 5v/16Mhz from 25 until 160 LEDS
