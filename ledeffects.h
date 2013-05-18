@@ -46,8 +46,8 @@ class LedEffect {
     virtual void tuneParamDown(byte param = 0);
     virtual void tuneValueUp();
     virtual void tuneValueDown();    
-    virtual byte getParamMap();
-    virtual byte getParamDefault();
+    virtual int getParamMap();
+    virtual int getParamDefault();
 };
 // ---------------------------------------------------------------------------
 // Display the selected color and fade the brightness following an approximated
@@ -66,8 +66,8 @@ class Fader : public virtual LedEffect {
     Fader(TLedStrip& ledstrip):LedEffect(ledstrip) {};
     void init(int parA, int parB);
     void update(int event);
-    byte getParamMap()     { return _HUE_| _VAL_; };
-    byte getParamDefault() { return _HUE_; };
+    int getParamMap()     { return _HUE_| _VAL_; };
+    int getParamDefault() { return _HUE_; };
 };
 
 // ---------------------------------------------------------------------------
@@ -82,8 +82,8 @@ class Fire : public virtual LedEffect {
     Fire(TLedStrip& ledstrip):LedEffect(ledstrip) {};
     void init(int parA, int parB);
     void update(int event);
-    byte getParamMap()     { return _HUE_| _VAL_; };
-    byte getParamDefault() { return _HUE_; };
+    int getParamMap()     { return _HUE_| _VAL_; };
+    int getParamDefault() { return _HUE_; };
 };
 
 // ---------------------------------------------------------------------------
@@ -101,8 +101,8 @@ class RainbowA : public virtual LedEffect {
     RainbowA(TLedStrip& ledstrip):LedEffect(ledstrip) {};
     void init(int parA, int parB);
     void update(int event);
-    byte getParamMap()     { return _HUE_| _VAL_; };
-    byte getParamDefault() { return _HUE_; };    
+    int getParamMap()     { return _HUE_| _VAL_; };
+    int getParamDefault() { return _HUE_; };    
 };
 // ---------------------------------------------------------------------------
 // Display a moving rainbow along the line
@@ -116,8 +116,8 @@ class RainbowB : public virtual LedEffect {
     RainbowB(TLedStrip& ledstrip):LedEffect(ledstrip) {};
     void init(int parA, int parB);
     void update(int event);
-    byte getParamMap()     { return _VAL_ | _VEL_; };
-    byte getParamDefault() { return _VEL_; };
+    int getParamMap()     { return _VAL_ | _VEL_; };
+    int getParamDefault() { return _VEL_; };
 };
 // ---------------------------------------------------------------------------
 // Move a pixel with a changing color and a flare behind along the line
@@ -127,12 +127,16 @@ class RainbowB : public virtual LedEffect {
 // ParB: unused
 
 class Slider : public virtual LedEffect {
+  private:
+    byte _fieldSize;
+    byte _fields;
+    
   public:
     Slider(TLedStrip& ledstrip):LedEffect(ledstrip) {};
     void init(int parA, int parB);
     void update(int event);
-    byte getParamMap()     { return _VAL_ | _VEL_; };
-    byte getParamDefault() { return _VEL_; };        
+    int getParamMap()     { return _VAL_ | _VEL_; };
+    int getParamDefault() { return _VEL_; };        
 };
 
 // ---------------------------------------------------------------------------
@@ -153,8 +157,8 @@ class StaticFields : public virtual LedEffect {
     StaticFields(TLedStrip& ledstrip):LedEffect(ledstrip) {};
     void init(int parA, int parB);
     void update(int event);
-    byte getParamMap()     { return _HUE_| _VAL_; };
-    byte getParamDefault() { return _HUE_; };  
+    int getParamMap()     { return _HUE_| _VAL_; };
+    int getParamDefault() { return _HUE_; };  
 };
 // ---------------------------------------------------------------------------
 // Display a number of fields with changing colors 
@@ -169,7 +173,7 @@ class DynamicFields : public StaticFields {
     DynamicFields(TLedStrip& ledstrip):LedEffect(ledstrip), StaticFields(ledstrip) {};
     void init(int parA, int parB);
     void update(int event);
-    byte getParamMap()     { return _VAL_| _VEL_; };
-    byte getParamDefault() { return _VEL_; };    
+    int getParamMap()     { return _VAL_ | _VEL_; };
+    int getParamDefault() { return _VEL_; };    
 };
 #endif

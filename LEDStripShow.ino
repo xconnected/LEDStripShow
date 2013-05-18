@@ -59,7 +59,7 @@ Fire          fire     (LedStrip);
 
 // Effect Objects and Parameter Array
 Effect_t Effect[_EFFECT_COUNT_] = {
-  { &fader,     4, 0 },
+  { &fader,     3, 0 },
   { &rainbowA, 90, 0 },
   { &rainbowB,  6, 0 },
   { &rainbowB,  2, 0 },
@@ -67,7 +67,8 @@ Effect_t Effect[_EFFECT_COUNT_] = {
   { &s_fields,  3, 1 },  
   { &d_fields,  LedStrip.getCount(), 0 },
   { &d_fields,  LedStrip.getCount(), 1 },
-  { &slider,    0, 0 },
+  { &slider,    4, 1 },
+  { &slider,    2, 4 },
   { &fire,      0, 0 }
 };
 // ---------------------------------------------------------------------------
@@ -171,9 +172,13 @@ void TLedStripShow::saveSettings(byte ix) {
  
   // Write what is different
   for (int i=0; i < _EEPROM_RECORD_LENGTH_; i++) {  
+#ifdef DEBUG
+      Serial.print("_");  
+      Serial.print(_buffer[i], HEX);        
+#endif      
     if ( EEPROM.read(offset + i) != _buffer[i] ) {
       EEPROM.write(offset + i, _buffer[i]);
-#ifdef DEBUG        
+#ifdef DEBUG
       count++;
 #endif      
     }
@@ -199,6 +204,10 @@ void TLedStripShow::loadSettings(byte ix) {
   // Load effect config into buffer
   for (int i=0; i < _EEPROM_RECORD_LENGTH_; i++) {
     _buffer[i] = EEPROM.read(offset + i);
+#ifdef DEBUG
+      Serial.print("_");  
+      Serial.print(_buffer[i], HEX);        
+#endif      
   }
 
   // Test record marker

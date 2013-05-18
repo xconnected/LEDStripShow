@@ -55,7 +55,7 @@ void LedEffect::tuneValueDown() {
 
 // ----------------------------------------------------------------------
 void LedEffect::init(int parA, int parB) {
-  LedStrip.blank();
+  //LedStrip.blank();
   TimerA.disable();
   TimerB.disable();
 }
@@ -71,22 +71,25 @@ int LedEffect::run() {
 
 // ----------------------------------------------------------------------
 void LedEffect::save(byte *data) {
-  byte paramMap = getParamMap();
+  int paramMap = getParamMap();
   
   *(int *)(data)   = (paramMap & _HUE_) ? Hue.getValue() : 0;
   *(int *)(data+2) = (paramMap & _SAT_) ? Sat.getValue() : 0;  
   *(int *)(data+4) = (paramMap & _VAL_) ? Val.getValue() : 0;
-  *(int *)(data+8) = (paramMap & _VEL_) ? Vel.getValue() : 0;
+  *(int *)(data+6) = (paramMap & _VEL_) ? Vel.getValue() : 0;
 }
 
 // ----------------------------------------------------------------------
 void LedEffect::load(byte *data) {
-  byte paramMap = getParamMap();
+  int paramMap = getParamMap();
   
   if (paramMap & _HUE_) Hue.setValue(*(int *)(data));
   if (paramMap & _SAT_) Sat.setValue(*(int *)(data+2));
   if (paramMap & _VAL_) Val.setValue(*(int *)(data+4));
-  if (paramMap & _VEL_) Vel.setValue(*(int *)(data+8));  
+  if (paramMap & _VEL_) {
+    Vel.setValue(*(int *)(data+6));  
+    TimerA.init(Vel.getValue(), &TimerAdapterA);      
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -122,9 +125,9 @@ void Fader::init(int parA, int parB) {
   
   LedEffect::init(parA, parB);  
 
-  Hue.init(  0,   4,   0, 359, TCounter::CYCLER);
+  Hue.init(  0,   2,   0, 359, TCounter::CYCLER);
   Sat.init(255,   0,   0, 255, TCounter::FIXED);
-  Val.init(128,   2,   0, 255, TCounter::CYCLER);
+  Val.init(100,   2,   0, 255, TCounter::CYCLER);
   
   TimerA.init(70, &TimerAdapterA); 
   
@@ -320,12 +323,19 @@ void RainbowB::update(int event) {
 void Slider::init(int parA, int parB) {
 
   LedEffect::init(parA, parB);  
-    
-  Hue.init( 20,   7,   0, 359, TCounter::CYCLER);
+
+  _fields    = parB;
+  _fieldSize = LedStrip.getCount() / _fields;
+ 
+  Hue.init( 20,parA,   0, 359, TCounter::CYCLER);
   Sat.init(255,   0,   0, 255, TCounter::FIXED);
   Val.init(255,   0,   0, 255, TCounter::FIXED);   
   Vel.init( 80,   5,  10, 200, TCounter::CYCLER);
-  Mover.init(0, 1, 0, LedStrip.getCount()-1, TCounter::UPDOWN);
+
+  // Init the slider length - extend by one 
+  // if the number of fields divided by the fields leaves a remainder
+  byte offset = ( (LedStrip.getCount() % _fields) > 0 ) ? 0 : 1;
+  Mover.init(0, 1, 0, _fieldSize - offset, TCounter::UPDOWN);
 
   TimerA.init(Vel.getValue(), &TimerAdapterA);
   TimerB.init(20, &TimerAdapterB);
@@ -333,11 +343,32 @@ void Slider::init(int parA, int parB) {
 // ----------------------------------------------------------------------
 void Slider::update(int event) {
 
+  byte remainder = _fieldSize % _fields;
+  byte offset    = 0;
+  byte length;  
+  
   switch(event) {
     case 0: // Motion
       Hue.increment();
       Mover.increment();
       LedStrip.setHSV(Mover.getValue(), Hue.getValue(), Sat.getValue(), Val.getValue());
+      
+      // Mirror all fiedls
+      if (_fields > 1 ) {
+        for(byte i = 0; i < _fields-1; i++) {
+  
+          if ( remainder > 0 ) {
+            remainder--;
+            length = _fieldSize+1;
+          }
+          else {
+            length = _fieldSize;
+          }
+          LedStrip.mirror(offset, offset+length, length );
+          offset += length;          
+        }
+      }
+      
       break;
       
     case 1:  // Filter
