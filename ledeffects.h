@@ -7,8 +7,8 @@
 #include <TTimer.h>
 #include <TLedstrip.h>
 
-PROGMEM const byte sinT[]  = { 0, 20, 40, 60, 79, 98, 116, 133, 150, 166, 180, 194, 206, 217, 227, 236, 243, 248, 252, 254, 255 };
-
+PROGMEM const byte sin8BitTable[]  = { 0, 20, 40, 60, 79, 98, 116, 133, 150, 166, 180, 194, 206, 217, 227, 236, 243, 248, 252, 254, 255 };
+  
 #define _HUE_ 1
 #define _SAT_ 2
 #define _VAL_ 4
@@ -43,9 +43,7 @@ class LedEffect {
     virtual void save(byte *data); 
     virtual void load(byte *data);
     virtual void tuneParamUp  (byte param = 0);
-    virtual void tuneParamDown(byte param = 0);
-    virtual void tuneValueUp();
-    virtual void tuneValueDown();    
+    virtual void tuneParamDown(byte param = 0);  
     virtual int getParamMap();
     virtual int getParamDefault();
 };

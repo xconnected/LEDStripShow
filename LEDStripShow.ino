@@ -22,7 +22,7 @@
 // Different Port, non-hardware SPI - 1.47ms for an 86 led frame
 
 // CONFIGURATION ITEM
-WS2801Controller<7, 13, 10, 3> LED;
+WS2801Controller<7, 13, 10, 4> LED;
 
 // ---------------------------------------------------------------------------
 #ifdef DEBUG
@@ -38,9 +38,10 @@ int freeRam () {
 // ---------------------------------------------------------------------------
 // CONFIGURATION ITEMS
 // UI Objects
-Rotary           UIRotary = Rotary(2, 3);
-TSwitch          UIButton = TSwitch(4);
-TSwitch          UISwitch = TSwitch(5);
+Rotary           UIRotary  = Rotary(2, 3);
+TSwitch          UIButton  = TSwitch(4);
+TSwitch          UISwitch1 = TSwitch(5);
+TSwitch          UISwitch2 = TSwitch(6);
 TLedStrip        LedStrip(_LED_COUNT_);
 
 // Controller Object
@@ -59,15 +60,16 @@ Fire          fire     (LedStrip);
 
 // Effect Objects and Parameter Array
 Effect_t Effect[_EFFECT_COUNT_] = {
+  { &s_fields,  1, 0 },
   { &fader,     3, 0 },
   { &rainbowA, 90, 0 },
   { &rainbowB,  6, 0 },
   { &rainbowB,  2, 0 },
-  { &s_fields,  3, 0 },
-  { &s_fields,  3, 1 },  
-  { &d_fields,  LedStrip.getCount(), 0 },
+  { &s_fields,  3, 1 },
+  { &s_fields,  3, 2 },  
   { &d_fields,  LedStrip.getCount(), 1 },
-  { &slider,    4, 1 },
+  { &d_fields,  LedStrip.getCount(), 2 },
+  { &slider,    2, 8 },
   { &slider,    2, 4 },
   { &fire,      0, 0 }
 };
@@ -310,13 +312,17 @@ void loop() {
   LightStripShow.run();
   // Test and debounce button
   UIButton.run();
-  // Test and debounce switch
-  UISwitch.run();  
+  // Test and debounce switches
+  UISwitch1.run();  
+  UISwitch2.run();    
 
 #ifdef DEBUG
-  if ( UISwitch.get() && UISwitch.hasChanged() ) {
+  if ( UISwitch1.get() && UISwitch.hasChanged() ) {
     Serial.println("switch");
   }
+  if ( UISwitch2.get() && UISwitch.hasChanged() ) {
+    Serial.println("switch");
+  }  
 #endif
   
   // Watch Program selection UIButton
@@ -344,10 +350,13 @@ ISR(PCINT2_vect) {
   if (result) {
     if (result == DIR_CW) {
 #ifdef DEBUG
-      Serial.println("Right-Up");
+      Serial.println("CW");
 #endif
-      if ( UISwitch.get() ) {
-        Effect[LightStripShow.getEffect()].pAppl->tuneValueUp();
+      if ( UISwitch1.get() ) {
+        Effect[LightStripShow.getEffect()].pAppl->tuneParamUp(_VAL_);
+      }
+      else if ( UISwitch2.get() ) {
+        Effect[LightStripShow.getEffect()].pAppl->tuneParamUp(_SAT_);
       }
       else {
         Effect[LightStripShow.getEffect()].pAppl->tuneParamUp();
@@ -356,10 +365,13 @@ ISR(PCINT2_vect) {
     }
     else if (result == DIR_CCW) {
 #ifdef DEBUG
-      Serial.println("Left-Dwn");
+      Serial.println("CCW");
 #endif
-      if ( UISwitch.get() ) {
-        Effect[LightStripShow.getEffect()].pAppl->tuneValueDown();
+      if ( UISwitch1.get() ) {
+        Effect[LightStripShow.getEffect()].pAppl->tuneParamDown(_VAL_);
+      }
+      else if ( UISwitch2.get() ) {
+        Effect[LightStripShow.getEffect()].pAppl->tuneParamDown(_SAT_);
       }
       else {
         Effect[LightStripShow.getEffect()].pAppl->tuneParamDown();

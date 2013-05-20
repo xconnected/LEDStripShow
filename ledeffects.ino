@@ -2,6 +2,31 @@
 #include "ledeffects.h"
 
 // ----------------------------------------------------------------------
+// Simple sin lookup function
+
+byte sinT8(byte ix) {
+  
+  byte sinX = 0;
+  
+  ix = ix % 360;
+  
+  if ( ix < 20 ) {
+    sinX = pgm_read_byte(&sin8BitTable[ix]);
+  }
+  else if ( ix < 40 ) {
+    sinX = pgm_read_byte(&sin8BitTable[39-ix]);    
+  }
+  else if ( ix < 60 ) {
+    sinX = pgm_read_byte(&sin8BitTable[ix-40]);
+  }
+  else if ( ix < 80 ) {
+    sinX = pgm_read_byte(&sin8BitTable[79-ix]);
+  }  
+  
+  return sinX;
+}
+
+// ----------------------------------------------------------------------
 TCounter LedEffect::Hue    = TCounter();
 TCounter LedEffect::Sat    = TCounter();
 TCounter LedEffect::Val    = TCounter();
@@ -23,6 +48,14 @@ void LedEffect::tuneParamUp(byte param) {
     case _HUE_: 
       Hue.increment();
       break;
+
+    case _SAT_: 
+      Sat.increment();
+      break;
+
+    case _VAL_: 
+      Val.increment();
+      break;
   }
 }
 
@@ -40,17 +73,15 @@ void LedEffect::tuneParamDown(byte param) {
     case _HUE_: 
       Hue.decrement();
       break;
+
+    case _SAT_: 
+      Sat.decrement();
+      break;
+      
+    case _VAL_: 
+      Val.decrement();
+      break;      
   }
-}
-
-// ----------------------------------------------------------------------
-void LedEffect::tuneValueUp() { 
-  Val.increment();
-}
-
-// ----------------------------------------------------------------------
-void LedEffect::tuneValueDown() { 
-  Val.decrement();
 }
 
 // ----------------------------------------------------------------------
@@ -98,8 +129,8 @@ void Fire::init(int parA, int parB) {
   LedEffect::init(parA, parB);  
 
   Hue.init(  0,   4,   0, 359, TCounter::CYCLER);
-  Sat.init(255,   0,   0, 255, TCounter::FIXED);
-  Val.init(200,   2, 100, 250, TCounter::UPDOWN);
+  Sat.init(255,   5,   0, 255, TCounter::CYCLER);
+  Val.init(200,   5,   0, 255, TCounter::CYCLER);
 
   TimerA.init(80, &TimerAdapterA); 
   TimerB.init(20, &TimerAdapterB);   
@@ -125,9 +156,9 @@ void Fader::init(int parA, int parB) {
   
   LedEffect::init(parA, parB);  
 
-  Hue.init(  0,   2,   0, 359, TCounter::CYCLER);
-  Sat.init(255,   0,   0, 255, TCounter::FIXED);
-  Val.init(100,   2,   0, 255, TCounter::CYCLER);
+  Hue.init(  0,   1,   0, 359, TCounter::CYCLER);
+  Sat.init(255,   5,   0, 255, TCounter::CYCLER);
+  Val.init(100,   5,   0, 255, TCounter::CYCLER);
   
   TimerA.init(70, &TimerAdapterA); 
   
@@ -148,22 +179,22 @@ void Fader::update(int event) {
   
   if ( _faderStep < 20 ) {
     ix = _faderStep;
-    sinX = pgm_read_byte(&sinT[ix]);
+    sinX = pgm_read_byte(&sin8BitTable[ix]);
     dv   = sinX / _faderPar;
   }
   else if ( _faderStep < 40 ) {
     ix = 39 - _faderStep;
-    sinX = pgm_read_byte(&sinT[ix]);    
+    sinX = pgm_read_byte(&sin8BitTable[ix]);    
     dv   = sinX / _faderPar;    
   }
   else if ( _faderStep < 60 ) {
     ix = _faderStep - 40;
-    sinX = pgm_read_byte(&sinT[ix]);
+    sinX = pgm_read_byte(&sin8BitTable[ix]);
     dv   = -sinX / _faderPar;    
   }
   else if ( _faderStep < 80 ) {
     ix = 79 - _faderStep;
-    sinX = pgm_read_byte(&sinT[ix]);
+    sinX = pgm_read_byte(&sin8BitTable[ix]);
     dv  = -sinX / _faderPar;    
   }  
 
@@ -182,8 +213,8 @@ void StaticFields::init(int parA, int parB) {
   _colorMode  = parB;
   
   Hue.init(  0,   2,   0, 359, TCounter::CYCLER);
-  Sat.init(255,   0,   0, 255, TCounter::FIXED);
-  Val.init(200,   2, 100, 250, TCounter::UPDOWN);
+  Sat.init(254,   5,   0, 255, TCounter::CYCLER);
+  Val.init(254,   5,   0, 255, TCounter::CYCLER);
   TimerA.init(100, &TimerAdapterA); 
 }
 
@@ -195,12 +226,12 @@ int StaticFields::colorStep(int scheme, int index) {
   const int analogComplementary[] = {0, 150, 210,-1};  
 
   switch(scheme) {
-    case 0:
+    case 1:
       index = constrain(index, 0, 3);
       deltaHue =  analog[index];
       break;
 
-    case 1:
+    case 2:
       index = constrain(index, 0, 3);
       deltaHue = analogComplementary[index];
       break;
@@ -216,38 +247,31 @@ int StaticFields::colorStep(int scheme, int index) {
 // ----------------------------------------------------------------------
 void StaticFields::update(int event) {
   
-  int fieldLen  = LedStrip.getCount() / _fieldCount;
-  int remainder = LedStrip.getCount() % _fieldCount;
-  
-  int  hue;
-  int  pos = 0;
+  int  dHue;
   int  len;
+  int  pos = 0;  
   byte count = 0;
+  int  fieldLen  = LedStrip.getCount() / _fieldCount;
+  int  remainder = LedStrip.getCount() % _fieldCount;
   
   for (int i=0; i < _fieldCount; i++) {
 
     // Handle colors 
-    hue = colorStep(_colorMode, count);
-    if (hue < 0) {
-          count = 0;
-          hue = Hue.getValue() + colorStep(_colorMode, count);
-    }
-    else {
-          count++;
-          hue =Hue.getValue() + hue;
+    dHue = colorStep(_colorMode, count++);
+    if (dHue < 0) {
+          dHue = colorStep(_colorMode, 0);
+          count = 1;          
     }
     
     // Determine the segment lenght including portion of the remainder
+    len = fieldLen;
     if (remainder != 0) {
-      len = fieldLen + 1;
+      len += 1;
       remainder--;
-    }
-    else {
-      len = fieldLen;
     }
     
     // Draw a color into the first position
-    LedStrip.setHSV(pos, hue, Sat.getValue(), Val.getValue());
+    LedStrip.setHSV(pos, Hue.getValue() + dHue, Sat.getValue(), Val.getValue());
 
     // Fill up the segment with the color of the first position
     LedStrip.fill(pos, len, LedStrip.get(pos));
@@ -284,8 +308,8 @@ void RainbowA::init(int parA, int parB) {
   
   _angle = parA;
   Hue.init(  0,  10,   0, 358, TCounter::CYCLER);
-  Sat.init(255,   0,   0, 255, TCounter::FIXED);
-  Val.init(255,   0,   0, 255, TCounter::FIXED);   
+  Sat.init(255,   5,   0, 255, TCounter::CYCLER);
+  Val.init(255,   5,   0, 255, TCounter::CYCLER);   
 
   TimerA.init(100, &TimerAdapterA);
 }
@@ -305,8 +329,8 @@ void RainbowB::init(int parA, int parB) {
   LedEffect::init(parA, parB);
 
   Hue.init(  0,parA,   0, 358, TCounter::CYCLER);
-  Sat.init(255,   0,   0, 255, TCounter::FIXED);
-  Val.init(255,   0,   0, 255, TCounter::FIXED);   
+  Sat.init(255,   5,   0, 255, TCounter::CYCLER);
+  Val.init(255,   5,   0, 255, TCounter::CYCLER);   
   Vel.init(100,   5,  10, 200, TCounter::CYCLER);
 
   TimerA.init(100, &TimerAdapterA);
@@ -328,8 +352,8 @@ void Slider::init(int parA, int parB) {
   _fieldSize = LedStrip.getCount() / _fields;
  
   Hue.init( 20,parA,   0, 359, TCounter::CYCLER);
-  Sat.init(255,   0,   0, 255, TCounter::FIXED);
-  Val.init(255,   0,   0, 255, TCounter::FIXED);   
+  Sat.init(255,   5,   0, 255, TCounter::CYCLER);
+  Val.init(255,   5,   0, 255, TCounter::CYCLER);   
   Vel.init( 80,   5,  10, 200, TCounter::CYCLER);
 
   // Init the slider length - extend by one 

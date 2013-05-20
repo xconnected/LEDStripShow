@@ -6,7 +6,7 @@
 #define       _LED_COUNT_               160
 
 // Number of active effects (used to size the effect array)
-#define       _EFFECT_COUNT_            11
+#define       _EFFECT_COUNT_            12
 
 // Time [ms] an effect is displayed until its cycles to the next 
 #define       _CYCLE_TIME_              ((unsigned long)(30000))
@@ -19,8 +19,8 @@
 // Bit to indicate cycling mode
 #define       _MODE_CYCLER_             (0x01)
 #define       _EEPROM_OFFSET_           4
-#define       _EEPROM_MARKER_           ((byte)(12))
-#define       _EEPROM_RECORD_MARKER_    ((byte)(12))
+#define       _EEPROM_MARKER_           ((byte)(13))
+#define       _EEPROM_RECORD_MARKER_    ((byte)(13))
 #define       _EEPROM_RECORD_LENGTH_    16
 
 // ---------------------------------------------------------------------------
