@@ -311,10 +311,10 @@ void loop() {
   // Process Application Timer
   LightStripShow.run();
   // Test and debounce button
-  UIButton.run();
+  UIButton.poll();
   // Test and debounce switches
-  UISwitch1.run();  
-  UISwitch2.run();    
+  UISwitch1.poll();  
+  UISwitch2.poll();    
 
 #ifdef DEBUG
   if ( UISwitch1.get() && UISwitch.hasChanged() ) {
